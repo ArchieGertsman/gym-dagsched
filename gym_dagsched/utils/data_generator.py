@@ -39,8 +39,6 @@ def generate_stages(job_id):
     stages = []
     for i in range(n_stages):
         n_tasks = np.random.randint(low=1, high=args.max_tasks+1)
-        # duration = np.random.normal(loc=30., scale=15.)
-        # TODO: duration for incompatible type should be inf
         worker_types_mask = generate_worker_types_mask()
         incompatible_worker_types = mask_to_indices(1-worker_types_mask)
         durations = generate_task_duration_per_worker_type(incompatible_worker_types)
@@ -66,7 +64,7 @@ def generate_task_duration_per_worker_type(incompatible_worker_types):
     # generate offsets from this baseline for each worker type
     # so that some workers will work slower than the baseline
     # while others will work faster than the baseline
-    worker_types_offsets = np.random.normal(scale=10., size=args.n_worker_types)
+    worker_types_offsets = np.random.normal(scale=5., size=args.n_worker_types)
 
     # compute the expected durations from the baseline 
     # and offsets
@@ -74,7 +72,7 @@ def generate_task_duration_per_worker_type(incompatible_worker_types):
     durations += worker_types_offsets
 
     # ensure that no expected duration is too small
-    durations = np.clip(durations, 10., None)
+    durations = np.clip(durations, 5., None)
 
     # give incompatible worker types an expected duration
     # of infinity

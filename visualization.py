@@ -28,7 +28,13 @@ def make_gantt(dagsched_state, title, x_max):
 
     fig_gantt.update_traces(width=1.) # set fixed height of gantt boxes
 
-    fig_gantt.update_yaxes(title_text='Workers', showticklabels=False, showgrid=False, ticks="")
+    fig_gantt.update_yaxes(
+        title_text='Workers', 
+        showticklabels=False, 
+        showgrid=False, 
+        ticks='')
+
+    fig_gantt.update_layout(showlegend=False)
     
     # _add_task_labels(fig_gantt, df_gantt)
 
@@ -82,14 +88,16 @@ def _add_job_completion_vlines(fig_gantt, jobs):
     for job in jobs:
         fig_gantt.add_vline(
             x=job.t_completed[0], 
-            line_width=2, 
-            line_color='red')
+            line_width=3, 
+            line_color='red',
+            opacity=0.8)
 
 
 def _setup_x_axis(fig_gantt, df_gantt, x_max):
-    # fig_gantt.layout.xaxis.type = 'linear'
-    fig_gantt.update_xaxes(title_text='Time', type='linear', range=(0,x_max), showgrid=False)
-    # fig_gantt.update_layout(xaxis_range=(0,x_max))
+    fig_gantt.update_xaxes(
+        title_text='Time', 
+        type='linear', 
+        range=(0,x_max), showgrid=False)
 
     df_gantt['delta'] = df_gantt.t_completed - df_gantt.t_accepted
     for d in fig_gantt.data:

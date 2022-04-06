@@ -4,7 +4,7 @@ from ..args import args
 from ..entities.action import Action
 
 
-def _pick_first(obs, key=None, reverse=False):
+def pick_first(obs, key=None, reverse=False, n_workers='max'):
     '''sorts the frontier stages by `key`, if provided,
     then selects the first stage in the sorted frontier 
     for which there is at least one available, compatible
@@ -17,7 +17,6 @@ def _pick_first(obs, key=None, reverse=False):
     avail_workers = obs.find_available_workers()
     
     first_stage = None
-
     for stage in frontier_stages:
         if first_stage is not None:
             break
@@ -26,18 +25,32 @@ def _pick_first(obs, key=None, reverse=False):
                 first_stage = stage
                 break
 
+    if first_stage is None:
+        return Action()
+
+    max_workers = int(first_stage.n_remaining_tasks)
+    if n_workers == 'max':
+        n_workers = max_workers
+    elif n_workers == 'one':
+        n_workers = 1
+    elif n_workers == 'random':
+        n_workers = np.random.randint(1, max_workers+1)
+
     action = Action(
         job_id=first_stage.job_id,
         stage_id=first_stage.id_,
-        n_workers=int(first_stage.n_remaining_tasks)
-    ) if first_stage is not None else Action()
-    
+        n_workers=n_workers
+    )
     return action
 
 
 def fcfs(obs):
     '''selects a frontier stage whose job arrived first'''
-    return _pick_first(obs)
+    return pick_first(obs)
+
+
+def frugal_fcfs(obs):
+    return pick_first(obs, greedy=False)
 
 
 def shortest_task_first(obs):
@@ -46,7 +59,7 @@ def shortest_task_first(obs):
         durations = stage.task_duration_per_worker_type
         durations = durations[durations<np.inf]
         return durations.mean()
-    return _pick_first(obs, key)
+    return pick_first(obs, key)
 
 
 def longest_task_first(obs):
@@ -55,4 +68,4 @@ def longest_task_first(obs):
         durations = stage.task_duration_per_worker_type
         durations = durations[durations<np.inf]
         return durations.mean()
-    return _pick_first(obs, key, reverse=True)
+    return pick_first(obs, key, reverse=True)
